@@ -4,10 +4,11 @@ import { Button } from './components/ui/button'
 import { Card, CardContent } from './components/ui/card'
 import { Progress } from './components/ui/progress'
 import { Badge } from './components/ui/badge'
-import { Upload, Camera, MapPin, Download, Sparkles, Image as ImageIcon, Users, RefreshCw, Trash2, Brain, Plus, X, Zap } from 'lucide-react'
+import { Upload, Camera, MapPin, Download, Sparkles, Image as ImageIcon, Users, RefreshCw, Trash2, Brain, Plus, X, Zap, Wand2 } from 'lucide-react'
 import { toast, Toaster } from 'react-hot-toast'
 import { InstantIDModule } from './components/InstantIDModule'
 import { FaceSwapModule } from './components/FaceSwapModule'
+import { PhotoMakerModule } from './components/PhotoMakerModule'
 
 interface User {
   id: string
@@ -68,7 +69,7 @@ function App() {
   const [isTrainingModel, setIsTrainingModel] = useState(false)
   const [trainingProgress, setTrainingProgress] = useState(0)
   const [useCustomModel, setUseCustomModel] = useState(false)
-  const [activeTab, setActiveTab] = useState<'single' | 'model' | 'instant' | 'faceswap'>('single')
+  const [activeTab, setActiveTab] = useState<'single' | 'model' | 'instant' | 'faceswap' | 'photomaker'>('single')
 
   useEffect(() => {
     const unsubscribe = blink.auth.onAuthStateChanged((state) => {
@@ -440,7 +441,7 @@ function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Tab Navigation */}
         <div className="mb-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-1 bg-white/80 backdrop-blur-sm rounded-lg p-1 border">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-1 bg-white/80 backdrop-blur-sm rounded-lg p-1 border">
             <button
               onClick={() => setActiveTab('single')}
               className={`flex items-center justify-center space-x-2 px-3 py-3 rounded-md text-sm font-medium transition-all ${
@@ -484,6 +485,21 @@ function App() {
               </Badge>
             </button>
             <button
+              onClick={() => setActiveTab('photomaker')}
+              className={`flex items-center justify-center space-x-2 px-3 py-3 rounded-md text-sm font-medium transition-all ${
+                activeTab === 'photomaker'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Wand2 className="h-4 w-4" />
+              <span className="hidden sm:inline">PhotoMaker</span>
+              <span className="sm:hidden">Photo</span>
+              <Badge variant="outline" className="ml-1 text-xs bg-emerald-100 text-emerald-700 border-emerald-300">
+                AI
+              </Badge>
+            </button>
+            <button
               onClick={() => setActiveTab('model')}
               className={`flex items-center justify-center space-x-2 px-3 py-3 rounded-md text-sm font-medium transition-all ${
                 activeTab === 'model'
@@ -504,7 +520,7 @@ function App() {
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Upload & Generation Section */}
           <div className="space-y-6">
-            {/* InstantID Module */}
+            {/* Module Content */}
             {activeTab === 'instant' ? (
               <InstantIDModule
                 user={user}
@@ -514,6 +530,13 @@ function App() {
               />
             ) : activeTab === 'faceswap' ? (
               <FaceSwapModule
+                user={user}
+                selectedDestination={selectedDestination}
+                TRAVEL_DESTINATIONS={TRAVEL_DESTINATIONS}
+                onImageGenerated={handleInstantIDImageGenerated}
+              />
+            ) : activeTab === 'photomaker' ? (
+              <PhotoMakerModule
                 user={user}
                 selectedDestination={selectedDestination}
                 TRAVEL_DESTINATIONS={TRAVEL_DESTINATIONS}
@@ -1003,10 +1026,25 @@ function App() {
                         {image.originalImages && image.originalImages.length > 0 ? (
                           <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                              <p className="text-sm font-medium">Generated with InstantID</p>
-                              <Badge variant="outline" className="text-xs bg-purple-100 text-purple-700 border-purple-300">
-                                <Zap className="h-3 w-3 mr-1" />
-                                InstantID
+                              <p className="text-sm font-medium">
+                                Generated with {image.id.includes('photomaker') ? 'PhotoMaker' : 'InstantID'}
+                              </p>
+                              <Badge variant="outline" className={`text-xs ${
+                                image.id.includes('photomaker') 
+                                  ? 'bg-emerald-100 text-emerald-700 border-emerald-300'
+                                  : 'bg-purple-100 text-purple-700 border-purple-300'
+                              }`}>
+                                {image.id.includes('photomaker') ? (
+                                  <>
+                                    <Wand2 className="h-3 w-3 mr-1" />
+                                    PhotoMaker
+                                  </>
+                                ) : (
+                                  <>
+                                    <Zap className="h-3 w-3 mr-1" />
+                                    InstantID
+                                  </>
+                                )}
                               </Badge>
                             </div>
                             <div className="space-y-3">
